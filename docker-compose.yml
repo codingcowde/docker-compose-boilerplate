@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+
+  web:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - compose-network
+    volumes:
+      - static:/static
+      - ./certbot/www:/var/www/certbot/:ro # certbot dir for ssl keys
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+  certbot:
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/www/:/var/www/certbot/
+      - ./certbot/conf/:/etc/letsencrypt/
+    networks:
+      - compose-network
+    depends_on:
+      - web
+
+
+volumes:
+  static:
+      driver: local
+  db-data:
+
+networks:
+ compose-network:
